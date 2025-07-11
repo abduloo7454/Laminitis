@@ -28,9 +28,12 @@ Please enter the following features measured from the horse to get a prediction.
 # selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
 # model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
 
-scaler = joblib.load("scaler.pkl")
-selector = joblib.load("feature_selector.pkl")
-model = joblib.load("voting_model.pkl")
+import os
+import joblib
+
+joblib.dump(scaler, "scaler.pkl")
+joblib.dump(selector, "feature_selector.pkl")
+joblib.dump(voting_clf, "voting_model.pkl")
 
 # Input form
 with st.form("laminitis_form"):
