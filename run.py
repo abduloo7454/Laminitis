@@ -20,29 +20,22 @@ This application uses a trained ensemble Voting Classifier to predict the risk o
 Please enter the following features measured from the horse to get a prediction.
 """)
 
-# Path to model weights
-#model_path = r"D:\\Medical_Imaging\\Risk Calculation\\Laminitis\\Weights"
+# Path to model weights (use relative path for Streamlit Cloud)
+model_path = "."
 
 # Load model components
-# scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
-# selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
-# model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
-
-import os
-import joblib
-
-joblib.dump(scaler, "scaler.pkl")
-joblib.dump(selector, "feature_selector.pkl")
-joblib.dump(voting_clf, "voting_model.pkl")
+scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
+selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
+model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
 
 # Input form
 with st.form("laminitis_form"):
     st.subheader("Enter Horse Diagnostic Features")
-    LLLH = st.number_input("LLLH", min_value=0.0, max_value=1.0, step=0)
-    HTLH = st.number_input("HTLH", min_value=0.0, max_value=1.0, step=0)
-    LERH = st.number_input("LERH", min_value=0.0, max_value=3.0, step=0)
-    LLRF = st.number_input("LLRF", min_value=0.0, max_value=1.0, step=0)
-    LERF = st.number_input("LERF", min_value=0.0, max_value=3.0, step=0)
+    LLLH = st.number_input("LLLH", min_value=0.0, max_value=1.0, step=0.1)
+    HTLH = st.number_input("HTLH", min_value=0.0, max_value=1.0, step=0.1)
+    LERH = st.number_input("LERH", min_value=0.0, max_value=3.0, step=0.1)
+    LLRF = st.number_input("LLRF", min_value=0.0, max_value=1.0, step=0.1)
+    LERF = st.number_input("LERF", min_value=0.0, max_value=3.0, step=0.1)
     submit = st.form_submit_button("Predict Risk")
 
 # On submit
