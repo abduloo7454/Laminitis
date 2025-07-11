@@ -23,24 +23,42 @@ Please enter the following features measured from the horse to get a prediction.
 # Path to model weights (use relative path for Streamlit Cloud)
 model_path = "."
 
-# Load model components
-scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
-selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
-model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
+# Safe loading with error handling
+try:
+    scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
+    selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
+    model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
+except Exception as e:
+    st.error("❌ Failed to load model files. This may be due to Python version incompatibility or custom object references in the pickled files.")
+    st.stop()
+
+# Define feature inputs and their min/max ranges
+feature_ranges = {
+    "LLLH": (0.0, 1.0),
+    "HTLH": (0.0, 1.0),
+    "LERH": (0.0, 3.0),
+    "LLRF": (0.0, 1.0),
+    "LERF": (0.0, 3.0)
+}
 
 # Input form
 with st.form("laminitis_form"):
     st.subheader("Enter Horse Diagnostic Features")
-    LLLH = st.number_input("LLLH", min_value=0.0, max_value=1.0, step=0.1)
-    HTLH = st.number_input("HTLH", min_value=0.0, max_value=1.0, step=0.1)
-    LERH = st.number_input("LERH", min_value=0.0, max_value=3.0, step=0.1)
-    LLRF = st.number_input("LLRF", min_value=0.0, max_value=1.0, step=0.1)
-    LERF = st.number_input("LERF", min_value=0.0, max_value=3.0, step=0.1)
+    inputs = {}
+    for feature, (min_val, max_val) in feature_ranges.items():
+        inputs[feature] = st.number_input(feature, min_value=min_val, max_value=max_val, step=0.1)
     submit = st.form_submit_button("Predict Risk")
 
 # On submit
 if submit:
-    input_features = np.array([[LLLH, HTLH, LERH, LLRF, LERF]])
+    input_features = np.array([[inputs[f] for f in feature_ranges]])
+
+    # Check number of features expected by scaler
+    expected_features = scaler.n_features_in_
+    if input_features.shape[1] != expected_features:
+        st.error(f"❌ Feature mismatch: model expects {expected_features} features, but got {input_features.shape[1]}")
+        st.stop()
+
     scaled_input = scaler.transform(input_features)
     selected_input = selector.transform(scaled_input)
     prediction = model.predict(selected_input)[0]
@@ -53,4 +71,4 @@ if submit:
 
     st.markdown("---")
     st.markdown("**Prediction Details:**")
-    st.write({"LLLH": LLLH, "HTLH": HTLH, "LERH": LERH, "LLRF": LLRF, "LERF": LERF})
+    st.write(inputs)
