@@ -21,12 +21,16 @@ Please enter the following features measured from the horse to get a prediction.
 """)
 
 # Path to model weights
-model_path = r"D:\\Medical_Imaging\\Risk Calculation\\Laminitis\\Weights"
+#model_path = r"D:\\Medical_Imaging\\Risk Calculation\\Laminitis\\Weights"
 
 # Load model components
-scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
-selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
-model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
+# scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
+# selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
+# model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
+
+scaler = joblib.load("scaler.pkl")
+selector = joblib.load("feature_selector.pkl")
+model = joblib.load("voting_model.pkl")
 
 # Input form
 with st.form("laminitis_form"):
