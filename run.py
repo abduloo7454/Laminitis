@@ -31,26 +31,25 @@ except Exception as e:
     st.error("❌ Failed to load model files. This may be due to Python version incompatibility or custom object references in the pickled files.")
     st.stop()
 
-# Define feature inputs and their min/max ranges
-feature_ranges = {
-    "LLLH": (0.0, 1.0),
-    "HTLH": (0.0, 1.0),
-    "LERH": (0.0, 3.0),
-    "LLRF": (0.0, 1.0),
-    "LERF": (0.0, 3.0)
-}
-
 # Input form
 with st.form("laminitis_form"):
-    st.subheader("Enter Horse Diagnostic Features")
-    inputs = {}
-    for feature, (min_val, max_val) in feature_ranges.items():
-        inputs[feature] = st.number_input(feature, min_value=min_val, max_value=max_val, step=0.1)
+    st.subheader("Enter Horse Diagnostic Features (Integer Only)")
+    LLLH = st.number_input("LLLH", min_value=0, max_value=1, step=1, format="%d")
+    HTLH = st.number_input("HTLH", min_value=0, max_value=1, step=1, format="%d")
+    LERH = st.number_input("LERH", min_value=0, max_value=3, step=1, format="%d")
+    LLRF = st.number_input("LLRF", min_value=0, max_value=1, step=1, format="%d")
+    LERF = st.number_input("LERF", min_value=0, max_value=3, step=1, format="%d")
     submit = st.form_submit_button("Predict Risk")
 
 # On submit
 if submit:
-    input_features = np.array([[inputs[f] for f in feature_ranges]])
+    # Validate input types are integers
+    values = [LLLH, HTLH, LERH, LLRF, LERF]
+    if not all(isinstance(v, int) or v.is_integer() for v in values):
+        st.warning("⚠️ Please enter only integer values for all features.")
+        st.stop()
+
+    input_features = np.array([[LLLH, HTLH, LERH, LLRF, LERF]])
 
     try:
         scaled_input = scaler.transform(input_features)
@@ -64,7 +63,7 @@ if submit:
 
         st.markdown("---")
         st.markdown("**Prediction Details:**")
-        st.write(inputs)
+        st.write({"LLLH": LLLH, "HTLH": HTLH, "LERH": LERH, "LLRF": LLRF, "LERF": LERF})
 
     except ValueError as e:
         st.error(f"❌ Feature mismatch or transformation error: {str(e)}")
