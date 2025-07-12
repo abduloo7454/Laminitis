@@ -26,7 +26,6 @@ model_path = "."
 # Safe loading with error handling
 try:
     scaler = joblib.load(os.path.join(model_path, "scaler.pkl"))
-    selector = joblib.load(os.path.join(model_path, "feature_selector.pkl"))
     model = joblib.load(os.path.join(model_path, "voting_model.pkl"))
 except Exception as e:
     st.error("❌ Failed to load model files. This may be due to Python version incompatibility or custom object references in the pickled files.")
@@ -53,22 +52,19 @@ with st.form("laminitis_form"):
 if submit:
     input_features = np.array([[inputs[f] for f in feature_ranges]])
 
-    # Check number of features expected by scaler
-    expected_features = scaler.n_features_in_
-    if input_features.shape[1] != expected_features:
-        st.error(f"❌ Feature mismatch: model expects {expected_features} features, but got {input_features.shape[1]}")
-        st.stop()
+    try:
+        scaled_input = scaler.transform(input_features)
+        prediction = model.predict(scaled_input)[0]
+        proba = model.predict_proba(scaled_input)[0][1]  # Probability of positive class
 
-    scaled_input = scaler.transform(input_features)
-    selected_input = selector.transform(scaled_input)
-    prediction = model.predict(selected_input)[0]
-    proba = model.predict_proba(selected_input)[0][1]  # Probability of positive class
+        if prediction == 1:
+            st.error(f"⚠️ High Risk of Laminitis (Confidence: {proba:.2%})")
+        else:
+            st.success(f"✅ Low Risk of Laminitis (Confidence: {1 - proba:.2%})")
 
-    if prediction == 1:
-        st.error(f"⚠️ High Risk of Laminitis (Confidence: {proba:.2%})")
-    else:
-        st.success(f"✅ Low Risk of Laminitis (Confidence: {1 - proba:.2%})")
+        st.markdown("---")
+        st.markdown("**Prediction Details:**")
+        st.write(inputs)
 
-    st.markdown("---")
-    st.markdown("**Prediction Details:**")
-    st.write(inputs)
+    except ValueError as e:
+        st.error(f"❌ Feature mismatch or transformation error: {str(e)}")
