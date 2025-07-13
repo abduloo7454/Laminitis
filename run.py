@@ -61,9 +61,5 @@ if submit:
         else:
             st.success(f"✅ Low Risk of Laminitis (Confidence: {1 - proba:.2%})")
 
-        st.markdown("---")
-        st.markdown("**Prediction Details:**")
-        st.write({"LLLH": LLLH, "HTLH": HTLH, "LERH": LERH, "LLRF": LLRF, "LERF": LERF})
-
     except ValueError as e:
         st.error(f"❌ Feature mismatch or transformation error: {str(e)}")
